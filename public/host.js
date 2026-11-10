@@ -1,5 +1,6 @@
 /* Host / projector screen */
 const socket = io();
+const APP_VERSION = "2026-11-10.2"; // shown on the host screen so you can check the deploy is current
 const H = { state: null, offset: 0, offline: false, authed: false, pinDraft: "", err: "", restartArmed: false };
 const app = document.getElementById("app");
 
@@ -16,7 +17,8 @@ socket.on("state", s => {
   H.offset = s.serverNow - Date.now();
   H.state = s;
   if (H.authed) loadSpotify();
-  // The song keeps playing over the answer + leaderboard; the next one loads when you click "Play song N"
+  // The song keeps playing over the answer + leaderboard. It only stops when you press Pause,
+  // when "Play song N" swaps in the next song, or when a 30-second Spotify preview runs out.
   if (s.phase === "lobby" || s.phase === "final") { if (!SP.paused) pauseClip(); cue(s.next); }
   render();
 });
@@ -151,7 +153,8 @@ function view() {
 
   const teams = s.teams || [];
   const foot = primary => `${errBox}<div class="controls">${primary}<span class="spacer"></span>
-    <button class="link" data-act="restart">${H.restartArmed ? "Tap again to restart from song 1" : "Restart game"}</button></div>`;
+    <button class="link" data-act="restart">${H.restartArmed ? "Tap again to restart from song 1" : "Restart game"}</button></div>
+    <p class="hint" style="margin-top:18px">Version ${APP_VERSION}</p>`;
   const audioBar = () => {
     const c = s.clip;
     if (!c) return "";
