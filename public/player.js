@@ -76,12 +76,15 @@ function view() {
     const has = me.answer != null;
     const open = s.phase === "question" && timeLeft(s) > 0;
     if (!open) return `<div class="phone">${nameTag}<p class="counter">Song ${song.n} of ${s.total}</p>
+      <div class="rec-sm">${record("19??", false)}</div>
+      <div class="timer" aria-hidden="true"><i style="width:0"></i></div>
       <p class="big pink" style="margin-top:10px">Time’s up!</p>
       <p style="font-weight:800;font-size:22px">${has ? `You locked in ${me.answer}.` : "No answer locked in, so 0 points this round."}</p>
       <p class="status note">Waiting for the reveal.</p></div>`;
     return `<div class="phone">${nameTag}<p class="counter">Song ${song.n} of ${s.total}</p>
-      <p class="counter" style="color:var(--pink)"><span id="ptleft">${s.roundSeconds}</span> seconds left</p>
-      <p class="tagline" style="font-size:30px;margin:4px 0 18px">What year?</p>
+      <div class="rec-sm">${record("19??", true)}</div>
+      <div class="timer" aria-hidden="true"><i id="ptbar"></i></div>
+      <p class="counter" style="margin-bottom:16px"><span id="ptleft">${s.roundSeconds}</span> seconds left</p>
       ${choiceTiles(song.choices, has ? me.answer : null, false)}
       ${errBox}
       <p class="status note" aria-live="polite">${has ? `Locked in: <b>${me.answer}</b>. Tap another year to change it before time runs out.` : "Tap a year to lock it in."}</p></div>`;
@@ -116,8 +119,10 @@ function render() {
 function tick() {
   const s = P.state;
   if (!s || s.phase !== "question") return;
-  const el = document.getElementById("ptleft");
-  if (el) el.textContent = Math.ceil(timeLeft(s));
+  const remain = timeLeft(s);
+  const el = document.getElementById("ptleft"), bar = document.getElementById("ptbar");
+  if (el) el.textContent = Math.ceil(remain);
+  if (bar) bar.style.width = (remain / s.roundSeconds * 100) + "%";
   render.pending || (render.pending = true, queueMicrotask(() => { render.pending = false; paint(app, view() + (P.offline ? `<div class="offline" role="status">Reconnecting…</div>` : "")); }));
 }
 setInterval(tick, 250);
