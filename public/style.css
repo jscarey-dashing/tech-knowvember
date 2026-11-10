@@ -175,20 +175,18 @@ button.choice:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--lin
 .btn.small{font-size:15px;padding:.5em 1em;box-shadow:3px 3px 0 var(--line)}
 .btn.ghost{background:var(--card);color:var(--ink)}
 
-/* Spotify dock on the host screen: the cover hides the track title */
+/* Spotify player docked on the host screen */
 body.host{padding-bottom:120px}
 .spotify-dock{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:300px;height:80px;z-index:15;
   border:3px solid #1A1A1A;border-radius:14px;overflow:hidden;box-shadow:5px 5px 0 var(--line);background:#1A1A1A}
 .spotify-dock[hidden]{display:none}
 .spotify-dock iframe{display:block;width:100%;height:80px;border:0}
-.spotify-cover{position:absolute;inset:0;background:var(--yellow);color:#1A1A1A;display:flex;align-items:center;gap:14px;padding:0 16px;
-  font-family:'Space Mono',monospace;font-size:13px;line-height:1.35}
-.mini-disc{width:46px;height:46px;flex:none;border-radius:50%;background:radial-gradient(circle,#EE4AA6 0 26%,#1C1C1C 28% 100%);
-  box-shadow:inset 0 0 0 6px #1C1C1C,inset 0 0 0 7px #3a3a3a}
-.spotify-dock.playing .mini-disc{animation:spin 2.2s linear infinite}
+
 
 /* Smaller spinning record on team phones */
 .rec-sm .recordzone{max-width:230px;margin:4px auto 0}
 .rec-sm .label{font-size:28px}
 .rec-sm .burst{font-size:12px;width:34%}
+.rec-sm .halftone{inset:-14%;background-size:10px 10px;
+  -webkit-mask:radial-gradient(circle,#000 46%,transparent 72%);mask:radial-gradient(circle,#000 46%,transparent 72%)}
 .rec-sm + .timer{margin:16px auto 6px}

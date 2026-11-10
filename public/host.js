@@ -36,8 +36,8 @@ function act(type, extra = {}) {
 }
 
 /* ---------- Spotify player ----------
-   The Spotify embed sits in a dock in the corner, under a "Now playing" cover so
-   its title and artwork never show. The game drives it through Spotify's iFrame API. */
+   The Spotify embed sits in a dock in the corner. The game drives it through
+   Spotify's iFrame API, and the host can also use the player's own controls. */
 const SP = { ctrl: null, requested: false, failed: false, loadedKey: null, startedKey: null, paused: true, pendingPlay: false, msg: "", watchdog: null };
 const dock = document.getElementById("spotify-dock");
 const keyOf = c => c.uri + "@" + c.start;
@@ -229,9 +229,6 @@ function view() {
 function render() {
   paint(app, view() + (H.offline ? `<div class="offline" role="status">Reconnecting to the server…</div>` : ""));
   dock.hidden = !H.authed || !SP.requested;
-  dock.classList.toggle("playing", !SP.paused);
-  document.getElementById("dockText").textContent =
-    SP.failed && !SP.ctrl ? "Spotify unavailable" : !SP.ctrl ? "Loading Spotify…" : SP.paused ? "Spotify ready" : "Now playing";
   tick();
 }
 function tick() {
