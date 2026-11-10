@@ -1,0 +1,18 @@
+{
+  "roundSeconds": 15,
+  "songs": [
+    { "title": "Poison", "artist": "Bell Biv DeVoe", "year": 1990, "track": 1, "choices": [1987, 1990, 1994, 1985], "audio": "01-poison.mp3", "start": 0 },
+    { "title": "Everybody (Backstreet’s Back)", "artist": "Backstreet Boys", "year": 1997, "track": 2, "choices": [2000, 1994, 1997, 1999], "audio": "02-everybody.mp3", "start": 0 },
+    { "title": "Mr. Brightside", "artist": "The Killers", "year": 2003, "track": 3, "choices": [2003, 2006, 2000, 2008], "audio": "03-mr-brightside.mp3", "start": 0 },
+    { "title": "Get Inspired", "artist": "Genesis Owusu", "year": 2022, "track": 4, "choices": [2019, 2024, 2022, 2017], "audio": "04-get-inspired.mp3", "start": 0 },
+    { "title": "Watermelon Sugar", "artist": "Harry Styles", "year": 2020, "track": 5, "choices": [2018, 2020, 2022, 2016], "audio": "05-watermelon-sugar.mp3", "start": 0 },
+    { "title": "Shake It Off", "artist": "Taylor Swift", "year": 2014, "track": 6, "choices": [2012, 2016, 2010, 2014], "audio": "06-shake-it-off.mp3", "start": 0 },
+    { "title": "Rock with You", "artist": "Michael Jackson", "year": 1979, "track": 7, "choices": [1983, 1979, 1975, 1987], "audio": "07-rock-with-you.mp3", "start": 0 },
+    { "title": "Wonderwall", "artist": "Oasis", "year": 1995, "track": 8, "choices": [1995, 1998, 1992, 2001], "audio": "08-wonderwall.mp3", "start": 0 },
+    { "title": "Somebody That I Used to Know", "artist": "Gotye & Kimbra", "year": 2011, "track": 9, "choices": [2013, 2009, 2015, 2011], "audio": "09-somebody-that-i-used-to-know.mp3", "start": 0 },
+    { "title": "Viva La Vida", "artist": "Coldplay", "year": 2008, "track": 10, "choices": [2005, 2008, 2011, 2003], "audio": "10-viva-la-vida.mp3", "start": 0 },
+    { "title": "Burning Love", "artist": "Elvis Presley", "year": 1972, "track": 11, "choices": [1968, 1975, 1972, 1965], "audio": "11-burning-love.mp3", "start": 0 },
+    { "title": "Man I Need", "artist": "Olivia Dean", "year": 2026, "track": 12, "choices": [2023, 2021, 2026, 2024], "audio": "12-man-i-need.mp3", "start": 0 },
+    { "title": "Rolling in the Deep", "artist": "Adele", "year": 2010, "track": 13, "choices": [2010, 2013, 2007, 2012], "audio": "13-rolling-in-the-deep.mp3", "start": 0 }
+  ]
+}

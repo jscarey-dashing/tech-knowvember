@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: knowvember
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: HOST_PIN
+        value: "8888"
