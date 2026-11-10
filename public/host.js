@@ -106,6 +106,15 @@ function playClip(c) {
 }
 function pauseClip() { clearTimeout(SP.watchdog); if (SP.ctrl) SP.ctrl.pause(); }
 
+// Play/Pause toggle: pausing keeps the position, playing carries on from there
+function togglePlay() {
+  const c = H.state && H.state.clip;
+  if (!c) return;
+  if (!SP.paused) { pauseClip(); return; }
+  if (SP.ctrl && SP.loadedKey === keyOf(c) && SP.startedKey === keyOf(c)) { SP.msg = ""; SP.ctrl.resume(); }
+  else playClip(c);
+}
+
 /* ---------- Clicks ---------- */
 const actions = {
   unlock: () => auth((document.getElementById("hostPin")?.value || "").trim(), false),
@@ -115,7 +124,7 @@ const actions = {
   board: () => act("board"),
   next: () => { if (H.state.next) playClip(H.state.next); act("next"); },
   replay: () => playClip(H.state.clip),
-  pause: () => pauseClip(),
+  toggle: () => togglePlay(),
   remove: el => act("removeTeam", { id: el.dataset.id }),
   clearTeams: () => act("clearTeams"),
   restart: () => {
@@ -148,8 +157,8 @@ function view() {
     const c = s.clip;
     if (!c) return "";
     return `<div class="audiobar">
-      ${c.uri ? `<button class="btn small ghost" data-act="replay">Play clip again</button>
-        ${!SP.paused ? `<button class="btn small ghost" data-act="pause">Pause</button>` : ""}` : ""}
+      ${c.uri ? `<button class="btn small ${SP.paused ? "pink" : "ghost"}" data-act="toggle" aria-label="${SP.paused ? "Play the song" : "Pause the song"}">${SP.paused ? "▶ Play" : "❚❚ Pause"}</button>
+        <button class="btn small ghost" data-act="replay">↺ Start from the top</button>` : ""}
       ${SP.msg ? `<p class="note">${esc(SP.msg)}</p>` : !c.uri ? `<p class="note">No Spotify link for this song. Play track ${c.track} from the playlist.</p>` : ""}
     </div>`;
   };
