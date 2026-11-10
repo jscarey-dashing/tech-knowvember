@@ -201,3 +201,7 @@ body.host{padding-bottom:120px}
 .row.me{outline:3px solid var(--pink);outline-offset:2px}
 .phone .row{grid-template-columns:36px 1fr auto auto;gap:8px;padding:9px 12px;font-size:16px}
 .phone .row .gain{font-size:.78em}
+
+/* Two Spotify players share the dock; only the one in front is visible */
+.sp-slot{position:absolute;inset:0;opacity:0;pointer-events:none}
+.sp-slot.front{opacity:1;pointer-events:auto;z-index:1}

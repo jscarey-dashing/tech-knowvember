@@ -116,7 +116,8 @@ function viewFor(socket) {
       answered: answering && t.answers[q] != null,
     }));
     if (phase !== "lobby") view.clip = clip(q);
-    view.next = phase === "lobby" ? clip(0) : phase === "board" && q + 1 < SONGS.length ? clip(q + 1) : null;
+    // next: the song after this one, sent during the round too so the host can load it in advance
+    view.next = phase === "lobby" ? clip(0) : (phase === "question" || phase === "board") && q + 1 < SONGS.length ? clip(q + 1) : null;
     if (revealed) view.standings = standings(phase === "final" ? SONGS.length - 1 : q);
   }
 

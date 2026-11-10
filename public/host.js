@@ -1,6 +1,6 @@
 /* Host / projector screen */
 const socket = io();
-const APP_VERSION = "2026-11-10.2"; // shown on the host screen so you can check the deploy is current
+const APP_VERSION = "2026-11-10.3"; // shown on the host screen so you can check the deploy is current
 const H = { state: null, offset: 0, offline: false, authed: false, pinDraft: "", err: "", restartArmed: false };
 const app = document.getElementById("app");
 
@@ -19,7 +19,8 @@ socket.on("state", s => {
   if (H.authed) loadSpotify();
   // The song keeps playing over the answer + leaderboard. It only stops when you press Pause,
   // when "Play song N" swaps in the next song, or when a 30-second Spotify preview runs out.
-  if (s.phase === "lobby" || s.phase === "final") { if (!SP.paused) pauseClip(); cue(s.next); }
+  if (s.phase === "lobby" || s.phase === "final") pauseClip();
+  sync();
   render();
 });
 
@@ -38,83 +39,133 @@ function act(type, extra = {}) {
   });
 }
 
-/* ---------- Spotify player ----------
-   The Spotify embed sits in a dock in the corner. The game drives it through
-   Spotify's iFrame API, and the host can also use the player's own controls. */
-const SP = { ctrl: null, requested: false, failed: false, loadedKey: null, startedKey: null, paused: true, pendingPlay: false, msg: "", watchdog: null };
+/* ---------- Spotify players ----------
+   Two Spotify embeds take turns: one plays the current song while the other loads
+   the next one in the background. Phones only start a song that is already loaded
+   when you tap, so "Play song N" simply presses play on the waiting player. */
+const SP = { api: null, players: [], active: null, expectN: null, requested: false, failed: false, paused: true, msg: "", watchdog: null };
 const dock = document.getElementById("spotify-dock");
 const keyOf = c => c.uri + "@" + c.start;
 
-function loadSpotify() {
-  const s = H.state;
-  const first = s && (s.next || s.clip);
-  if (SP.requested || !first || !first.uri) return;
-  SP.requested = true;
-  dock.hidden = false;
-  window.onSpotifyIframeApiReady = api => {
-    api.createController(document.getElementById("spotify-embed"), { uri: first.uri, width: "100%", height: "80" }, ctrl => {
-      SP.ctrl = ctrl;
-      SP.loadedKey = first.uri + "@0";
-      ctrl.addListener("ready", () => { if (SP.pendingPlay) { SP.pendingPlay = false; ctrl.play(); } });
+function makePlayer(slotId, wrapId, clip) {
+  return new Promise(resolve => {
+    SP.api.createController(document.getElementById(slotId), { uri: clip.uri, width: "100%", height: "80" }, ctrl => {
+      const p = { ctrl, wrap: document.getElementById(wrapId), key: clip.uri + "@0", startedKey: null, paused: true, pendingPlay: false };
+      ctrl.addListener("ready", () => { if (p.pendingPlay) { p.pendingPlay = false; ctrl.play(); } });
       ctrl.addListener("playback_update", e => {
         const d = e.data || {};
-        const paused = !!d.isPaused;
-        if (!paused && !d.isBuffering) { clearTimeout(SP.watchdog); SP.startedKey = SP.loadedKey; if (SP.msg) { SP.msg = ""; render(); } }
-        if (paused !== SP.paused) { SP.paused = paused; render(); }
+        p.paused = !!d.isPaused;
+        if (!p.paused && !d.isBuffering) {
+          p.startedKey = p.key;
+          if (p === SP.active) { clearTimeout(SP.watchdog); SP.msg = ""; }
+          else ctrl.pause(); // only the active player should ever be heard
+        }
+        SP.paused = SP.active ? SP.active.paused : true;
+        sync();
+        render();
       });
-      const s2 = H.state;
-      if (s2 && s2.phase === "lobby") cue(s2.next);
-      render();
+      resolve(p);
     });
+  });
+}
+
+function loadSpotify() {
+  const s = H.state;
+  if (SP.requested || !s) return;
+  const first = s.clip || s.next;
+  if (!first || !first.uri) return;
+  SP.requested = true;
+  dock.hidden = false;
+  window.onSpotifyIframeApiReady = async api => {
+    SP.api = api;
+    const a = await makePlayer("spotify-embed-a", "slot-a", first);
+    const n = H.state && H.state.next;
+    const b = await makePlayer("spotify-embed-b", "slot-b", n && n.uri ? n : first);
+    SP.players = [a, b];
+    sync();
+    render();
   };
   const sc = document.createElement("script");
   sc.src = "https://open.spotify.com/embed/iframe-api/v1";
   sc.async = true;
   sc.onerror = () => { SP.failed = true; render(); };
   document.head.appendChild(sc);
-  setTimeout(() => { if (!SP.ctrl) { SP.failed = true; render(); } }, 12000);
+  setTimeout(() => { if (!SP.players.length) { SP.failed = true; render(); } }, 12000);
 }
 
-// Load a song ahead of time so it starts instantly when the host clicks
-function cue(c) {
-  if (!SP.ctrl || !c || !c.uri || SP.loadedKey === keyOf(c)) return;
-  SP.loadedKey = keyOf(c);
-  SP.startedKey = null;
-  SP.ctrl.loadUri(c.uri, false, c.start);
+function cue(p, c) {
+  if (!p || !c || !c.uri || p.key === keyOf(c)) return;
+  p.key = keyOf(c);
+  p.startedKey = null;
+  p.ctrl.loadUri(c.uri, false, c.start);
 }
 
-// Must run inside the host's click so the browser allows sound
+// Keep the player holding the current song active, and load the next song into the other one
+function sync() {
+  const s = H.state;
+  if (!s || SP.players.length < 2) return;
+  const cur = s.phase === "lobby" || s.phase === "final" ? null : s.clip;
+  // Just after a tap the server hasn't moved to the new song yet: keep the player that was tapped
+  const waiting = SP.expectN && (!cur || cur.n < SP.expectN);
+  if (!waiting) {
+    SP.expectN = null;
+    if (cur) {
+      const holder = SP.players.find(p => p.key === keyOf(cur));
+      if (holder) SP.active = holder;
+    } else if (SP.active && SP.active.paused) SP.active = null;
+  }
+  const idle = SP.players.find(p => p !== SP.active);
+  // Load the next song into the waiting player (never one that's playing, and not mid-handoff)
+  if (!waiting && idle && idle.paused && s.next && !(SP.active && SP.active.key === keyOf(s.next))) cue(idle, s.next);
+  const front = SP.active || idle;
+  SP.players.forEach(p => p.wrap.classList.toggle("front", p === front));
+  SP.paused = SP.active ? SP.active.paused : true;
+}
+
+// Runs inside the host's tap/click so the browser allows sound
 function playClip(c) {
   SP.msg = "";
   if (!c) return;
   if (!c.uri) { SP.msg = `No Spotify link for song ${c.n}. Play track ${c.track} from the playlist.`; return; }
-  if (!SP.ctrl) {
-    SP.msg = SP.failed ? `Spotify didn’t load. Play track ${c.track} from the playlist.` : "Spotify is still loading. Try “Play clip again” in a moment.";
+  if (SP.players.length < 2) {
+    SP.msg = SP.failed ? `Spotify didn’t load. Play track ${c.track} from the playlist.` : "Spotify is still loading. Try ▶ Play in a moment.";
     return;
   }
   const key = keyOf(c);
-  if (SP.loadedKey !== key) {
-    SP.loadedKey = key; SP.startedKey = null; SP.pendingPlay = true;
-    SP.ctrl.loadUri(c.uri, false, c.start);
-    setTimeout(() => { if (SP.pendingPlay) { SP.pendingPlay = false; SP.ctrl.play(); } }, 1500);
-  } else if (SP.startedKey === key) {
-    SP.ctrl.seek(c.start); SP.ctrl.resume();
+  let p = SP.players.find(x => x.key === key);
+  SP.players.forEach(x => { if (x !== p && !x.paused) x.ctrl.pause(); });
+  if (!p) {
+    // Not loaded in advance (e.g. the page was just reloaded): load it now and play when ready
+    p = SP.players.find(x => x !== SP.active) || SP.players[0];
+    p.key = key; p.startedKey = null; p.pendingPlay = true;
+    p.ctrl.loadUri(c.uri, false, c.start);
+    setTimeout(() => { if (p.pendingPlay) { p.pendingPlay = false; p.ctrl.play(); } }, 1500);
+  } else if (p.startedKey === key) {
+    p.ctrl.seek(c.start); p.ctrl.resume();
   } else {
-    SP.ctrl.play();
+    p.ctrl.play();
   }
+  SP.active = p;
+  SP.expectN = c.n;
+  SP.players.forEach(x => x.wrap.classList.toggle("front", x === p));
   clearTimeout(SP.watchdog);
   SP.watchdog = setTimeout(() => {
-    if (SP.paused) { SP.msg = `Spotify didn’t start. Click “Play clip again”, or play track ${c.track} from the playlist.`; render(); }
+    if (SP.active === p && p.paused) { SP.msg = `Spotify didn’t start. Tap ▶ Play, or play track ${c.track} from the playlist.`; render(); }
   }, 7000);
 }
-function pauseClip() { clearTimeout(SP.watchdog); if (SP.ctrl) SP.ctrl.pause(); }
+
+function pauseClip() {
+  clearTimeout(SP.watchdog);
+  SP.players.forEach(p => { if (!p.paused) p.ctrl.pause(); });
+}
 
 // Play/Pause toggle: pausing keeps the position, playing carries on from there
 function togglePlay() {
   const c = H.state && H.state.clip;
   if (!c) return;
-  if (!SP.paused) { pauseClip(); return; }
-  if (SP.ctrl && SP.loadedKey === keyOf(c) && SP.startedKey === keyOf(c)) { SP.msg = ""; SP.ctrl.resume(); }
+  const p = SP.active;
+  if (p && !p.paused) { pauseClip(); return; }
+  if (p && p.key === keyOf(c) && p.startedKey === keyOf(c)) { SP.msg = ""; p.ctrl.resume(); }
   else playClip(c);
 }
 

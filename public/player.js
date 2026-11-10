@@ -116,7 +116,7 @@ function view() {
 }
 
 function render() {
-  paint(app, view() + (P.offline ? `<div class="offline" role="status">Reconnecting…</div>` : ""));
+  paint(app, `<div class="phone">${mast()}</div>` + view() + (P.offline ? `<div class="offline" role="status">Reconnecting…</div>` : ""));
   tick();
 }
 
@@ -127,7 +127,7 @@ function tick() {
   const el = document.getElementById("tleft"), bar = document.getElementById("tbar");
   if (el) el.textContent = `${Math.ceil(remain)} seconds left`;
   if (bar) bar.style.width = (remain / s.roundSeconds * 100) + "%";
-  render.pending || (render.pending = true, queueMicrotask(() => { render.pending = false; paint(app, view() + (P.offline ? `<div class="offline" role="status">Reconnecting…</div>` : "")); }));
+  render.pending || (render.pending = true, queueMicrotask(() => { render.pending = false; paint(app, `<div class="phone">${mast()}</div>` + view() + (P.offline ? `<div class="offline" role="status">Reconnecting…</div>` : "")); }));
 }
 setInterval(tick, 250);
 render();
