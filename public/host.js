@@ -16,7 +16,8 @@ socket.on("state", s => {
   H.offset = s.serverNow - Date.now();
   H.state = s;
   if (H.authed) loadSpotify();
-  if (s.phase === "board" || s.phase === "lobby" || s.phase === "final") { if (!SP.paused) pauseClip(); cue(s.next); }
+  // The song keeps playing over the answer + leaderboard; the next one loads when you click "Play song N"
+  if (s.phase === "lobby" || s.phase === "final") { if (!SP.paused) pauseClip(); cue(s.next); }
   render();
 });
 
@@ -60,7 +61,7 @@ function loadSpotify() {
         if (paused !== SP.paused) { SP.paused = paused; render(); }
       });
       const s2 = H.state;
-      if (s2 && (s2.phase === "lobby" || s2.phase === "board")) cue(s2.next);
+      if (s2 && s2.phase === "lobby") cue(s2.next);
       render();
     });
   };
@@ -120,9 +121,7 @@ const actions = {
   unlock: () => auth((document.getElementById("hostPin")?.value || "").trim(), false),
   start: () => { playClip(H.state.next); act("start"); },
   lock: () => act("lock"),
-  reveal: () => act("reveal"),
-  board: () => act("board"),
-  next: () => { if (H.state.next) playClip(H.state.next); act("next"); },
+  next: () => { if (H.state.next) playClip(H.state.next); else pauseClip(); act("next"); },
   replay: () => playClip(H.state.clip),
   toggle: () => togglePlay(),
   remove: el => act("removeTeam", { id: el.dataset.id }),
@@ -177,40 +176,27 @@ function view() {
 
   const song = s.song;
 
-  if (s.phase === "question" || s.phase === "locked") {
-    const live = s.phase === "question";
+  if (s.phase === "question") {
     const answered = teams.filter(t => t.answered);
     return `${mast()}<div class="split"><div>
       <p class="counter">Song ${song.n} of ${s.total}</p>
-      <div class="timer" aria-hidden="true"><i id="tbar" ${live ? "" : 'style="width:0"'}></i></div>
-      <p class="counter" id="tleft">${live ? "&nbsp;" : "Time’s up. Answers are locked."}</p>
+      <div class="timer" aria-hidden="true"><i id="tbar"></i></div>
+      <p class="counter" id="tleft">&nbsp;</p>
       <p class="counter">${answered.length} of ${teams.length} locked in</p>
       <div class="chips">${teams.map(t => `<span class="chip ${t.answered ? "done" : ""} ${t.connected ? "" : "away"}">${esc(t.name)}</span>`).join("")}</div>
       ${audioBar()}
-    </div><div>${record("19??", live)}</div></div>
+    </div><div>${record("19??", true)}</div></div>
     ${choiceTiles(song.choices, null, true)}
-    ${foot(live
-      ? `<button class="btn" data-act="lock">Stop the clock now</button>`
-      : `<button class="btn pink" data-act="reveal">Reveal the answer</button>`)}`;
+    ${foot(`<button class="btn pink" data-act="lock">Stop the clock and reveal</button>`)}`;
   }
 
-  if (s.phase === "reveal") {
-    const list = s.results || [];
-    return `${mast()}<div class="split"><div>
-      <p class="counter">Song ${song.n} of ${s.total}</p>
-      <p class="big pink">${song.year}</p>
-      <h2 class="songt">${esc(song.title)}</h2><p class="artist">${esc(song.artist)}</p>
-      <div class="rows">${list.map(t => `<div class="row"><span class="rk">${t.g ?? "—"}</span><span class="nm">${esc(t.name)}</span>
-        <span class="gain">${t.g == null ? "no answer" : t.p === 1000 ? "spot on" : ""}</span><span class="tot">+${fmt(t.p)}</span></div>`).join("") || `<p class="note">No teams answered.</p>`}</div>
-      ${audioBar()}
-    </div><div>${record(String(song.year), false, false)}</div></div>
-    ${foot(`<button class="btn pink" data-act="board">Show leaderboard</button>`)}`;
-  }
-
+  // Answer + leaderboard in one screen
   if (s.phase === "board") {
     const last = song.n >= s.total;
-    return `${mast()}<p class="counter">Leaderboard after song ${song.n} of ${s.total}</p>
-      <h1 class="title" style="font-size:clamp(64px,10vw,150px)"><span class="b">Standings</span></h1>
+    return `${mast()}<p class="counter">Song ${song.n} of ${s.total}</p>
+      <div class="answerline"><p class="big pink">${song.year}</p>
+        <div><h2 class="songt">${esc(song.title)}</h2><p class="artist">${esc(song.artist)}</p></div></div>
+      ${audioBar()}
       ${boardRows(s.standings || [], true)}
       ${foot(`<button class="btn pink" data-act="next">${last ? "Reveal the winners" : `Play song ${song.n + 1}`}</button>`)}`;
   }
@@ -237,7 +223,7 @@ function tick() {
   const remain = timeLeft(s);
   const bar = document.getElementById("tbar"), left = document.getElementById("tleft");
   if (bar) bar.style.width = (remain / s.roundSeconds * 100) + "%";
-  if (left) left.textContent = remain > 0 ? `${Math.ceil(remain)} seconds left` : "Time’s up. Locking answers…";
+  if (left) left.textContent = remain > 0 ? `${Math.ceil(remain)} seconds left` : "Time’s up. Revealing…";
 }
 setInterval(tick, 250);
 render();

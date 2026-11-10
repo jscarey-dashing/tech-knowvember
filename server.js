@@ -74,7 +74,8 @@ function scoreList(upto) {
     let total = 0;
     for (let i = 0; i <= upto; i++) { const r = game.results[i]; if (r && r[t.id]) total += r[t.id].p; }
     const last = game.results[upto] && game.results[upto][t.id];
-    return { id: t.id, name: t.name, total, last: last ? last.p : null };
+    // guess: the year picked (null = no answer); left out if the team joined after this song
+    return { id: t.id, name: t.name, total, last: last ? last.p : null, ...(last ? { guess: last.g } : {}) };
   });
   list.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
   let rank = 0, prev = null;
@@ -98,7 +99,7 @@ function clip(i) {
 
 function viewFor(socket) {
   const { phase, q } = game;
-  const revealed = phase === "reveal" || phase === "board" || phase === "final";
+  const revealed = phase === "board" || phase === "final";
   const s = SONGS[q];
   const view = {
     gameId: game.gameId, phase, q, total: SONGS.length, roundSeconds: ROUND_SECONDS,
@@ -115,12 +116,7 @@ function viewFor(socket) {
     }));
     if (phase !== "lobby") view.clip = clip(q);
     view.next = phase === "lobby" ? clip(0) : phase === "board" && q + 1 < SONGS.length ? clip(q + 1) : null;
-    if (revealed) {
-      const r = game.results[q] || {};
-      view.results = Object.keys(r).map(id => ({ name: r[id].name, g: r[id].g, p: r[id].p }))
-        .sort((a, b) => b.p - a.p || a.name.localeCompare(b.name));
-    }
-    if (phase === "board" || phase === "final") view.standings = standings(phase === "final" ? SONGS.length - 1 : q);
+    if (revealed) view.standings = standings(phase === "final" ? SONGS.length - 1 : q);
   }
 
   const t = socket.data.teamId && teams.get(socket.data.teamId);
@@ -133,7 +129,7 @@ function viewFor(socket) {
       view.me.rank = mine ? mine.rank : null;
       view.me.total = mine ? mine.total : 0;
       view.me.of = st.length;
-      if (phase === "final") view.top = st.slice(0, 5);
+      view.board = st;
     }
   }
   return view;
@@ -162,17 +158,15 @@ function lockRound() {
     res[t.id] = { name: t.name, g, p: points(g, song) };
   }
   game.results[q] = res;
-  game.phase = "locked";
+  game.phase = "board"; // the answer and the leaderboard show together
   broadcast();
 }
 
 const hostActions = {
   start: () => { if (game.phase !== "lobby") return "The game has already started."; if (!teams.size) return "Wait for at least one team to join."; startQuestion(0); },
   lock: () => { if (game.phase !== "question") return "There’s no clock running."; lockRound(); },
-  reveal: () => { if (game.phase !== "locked") return "Lock the answers first."; game.phase = "reveal"; broadcast(); },
-  board: () => { if (game.phase !== "reveal") return "Reveal the answer first."; game.phase = "board"; broadcast(); },
   next: () => {
-    if (game.phase !== "board") return "Show the leaderboard first.";
+    if (game.phase !== "board") return "Finish this song first.";
     if (game.q + 1 < SONGS.length) startQuestion(game.q + 1);
     else { game.phase = "final"; broadcast(); }
   },

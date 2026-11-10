@@ -91,9 +91,9 @@ function view() {
       <p class="status note" aria-live="polite">${has ? `Locked in: <b>${me.answer}</b>. Tap another year to change it before time runs out.` : "Tap a year to lock it in."}</p></div>`;
   }
 
-  if (s.phase === "reveal" || s.phase === "board") {
+  if (s.phase === "board") {
     const r = me.result;
-    const verdict = !r ? "You joined after this one." : r.g == null ? "No answer this round." : r.p === 1000 ? "Spot on!" : r.p > 0 ? `You said ${r.g}.` : `You said ${r.g}. Not this time.`;
+    const verdict = !r ? "You joined after this one." : r.g == null ? "No answer this round." : r.p === 1000 ? "Spot on!" : r.p > 0 ? `You said ${r.g}. Close!` : `You said ${r.g}. Not this time.`;
     return `<div class="phone">${nameTag}<div class="result">
       <p class="counter">Song ${song.n}: ${esc(song.title)}, ${esc(song.artist)}</p>
       <p class="big blue" style="margin-top:6px">${song.year}</p>
@@ -101,14 +101,17 @@ function view() {
       <p class="pts">+${fmt(r ? r.p : 0)}</p></div>
       ${me.rank ? `<div class="ticket"><div class="k">Your position</div><div class="v pink">${me.rank}<span style="font-size:.5em"> of ${me.of}</span></div>
         <div class="k" style="margin-top:6px">${fmt(me.total)} points</div></div>` : ""}
-      <p class="status note">${s.phase === "board" ? "Look up: the leaderboard is on screen." : "Next up: the leaderboard."}</p></div>`;
+      <h2 class="counter mt">Leaderboard</h2>
+      ${boardRows(s.board || [], true, me.id)}
+      <p class="status note">Next song coming up.</p></div>`;
   }
 
   if (s.phase === "final") return `<div class="phone">${top}
     <div class="ticket mt"><div class="k">You finished</div>
     <div class="v pink">${me.rank || "–"}<span style="font-size:.5em"> of ${me.of}</span></div>
     <div class="k" style="margin-top:6px">${fmt(me.total)} points</div></div>
-    ${boardRows(s.top || [], false)}<p class="status note">Thanks for playing. Enjoy the food!</p></div>`;
+    <h2 class="counter mt">Final leaderboard</h2>
+    ${boardRows(s.board || [], false, me.id)}<p class="status note">Thanks for playing. Enjoy the food!</p></div>`;
   return "";
 }
 

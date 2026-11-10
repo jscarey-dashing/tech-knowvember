@@ -190,3 +190,14 @@ body.host{padding-bottom:120px}
 .rec-sm .halftone{inset:-14%;background-size:10px 10px;
   -webkit-mask:radial-gradient(circle,#000 46%,transparent 72%);mask:radial-gradient(circle,#000 46%,transparent 72%)}
 .rec-sm + .timer{margin:16px auto 6px}
+
+/* Answer + leaderboard screen */
+.answerline{display:flex;align-items:flex-end;gap:clamp(16px,3vw,36px);flex-wrap:wrap;margin-bottom:6px}
+.answerline .big{margin:0}
+.answerline .songt{margin:0 0 4px}
+.gain.ok{color:#1E9E55} .gain.near{color:var(--pink)} .gain.no,.gain.muted{color:var(--muted)}
+.gain .plus{opacity:.8;margin-left:4px}
+.row.lead .gain.ok{color:#0F6E38} .row.lead .gain.near{color:#C42585} .row.lead .gain.no,.row.lead .gain.muted{color:#5a5a5a}
+.row.me{outline:3px solid var(--pink);outline-offset:2px}
+.phone .row{grid-template-columns:36px 1fr auto auto;gap:8px;padding:9px 12px;font-size:16px}
+.phone .row .gain{font-size:.78em}

@@ -27,13 +27,22 @@ function choiceTiles(choices, chosen, host) {
   ).join("")}</div>`;
 }
 
-function boardRows(list, showGain) {
+/* showGain: show each team's guess for the song just played (✓ spot on, ≈ close, ✗ no points)
+   meId: highlight this team's row on its own phone */
+function guessCell(t) {
+  if (t.guess === undefined) return `<span class="gain muted">joined later</span>`;
+  if (t.guess === null) return `<span class="gain no">✗ no answer</span>`;
+  const cls = t.last === 1000 ? "ok" : t.last > 0 ? "near" : "no";
+  const mark = t.last === 1000 ? "✓" : t.last > 0 ? "≈" : "✗";
+  return `<span class="gain ${cls}">${mark} ${t.guess} <span class="plus">+${fmt(t.last)}</span></span>`;
+}
+function boardRows(list, showGain, meId) {
   const top = Math.max(1, ...list.map(t => t.total));
   return `<div class="rows">${list.map(t => {
     const mv = t.move > 0 ? `<span class="mv up" aria-label="up ${t.move}">▲${t.move}</span>`
       : t.move < 0 ? `<span class="mv dn" aria-label="down ${-t.move}">▼${-t.move}</span>` : "";
-    const gain = showGain && t.last != null ? `<span class="gain">+${fmt(t.last)}</span>` : `<span></span>`;
-    return `<div class="row ${t.rank === 1 && t.total > 0 ? "lead" : ""}">
+    const gain = showGain ? guessCell(t) : `<span></span>`;
+    return `<div class="row ${t.rank === 1 && t.total > 0 ? "lead" : ""} ${meId && t.id === meId ? "me" : ""}">
       <span class="rk">${String(t.rank).padStart(2, "0")}</span>
       <span class="nm">${esc(t.name)}${mv}</span>${gain}<span class="tot">${fmt(t.total)}</span>
       <div class="bar"><i data-w="${Math.round(t.total / top * 100)}" style="width:0"></i></div></div>`;
