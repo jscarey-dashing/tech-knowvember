@@ -178,14 +178,14 @@ function view() {
 
   if (s.phase === "question") {
     const answered = teams.filter(t => t.answered);
-    return `${mast()}<div class="split"><div>
+    return `${mast()}<div>
       <p class="counter">Song ${song.n} of ${s.total}</p>
-      <div class="timer" aria-hidden="true"><i id="tbar"></i></div>
+      <div class="timer" aria-hidden="true" style="max-width:none"><i id="tbar"></i></div>
       <p class="counter" id="tleft">&nbsp;</p>
       <p class="counter">${answered.length} of ${teams.length} locked in</p>
       <div class="chips">${teams.map(t => `<span class="chip ${t.answered ? "done" : ""} ${t.connected ? "" : "away"}">${esc(t.name)}</span>`).join("")}</div>
       ${audioBar()}
-    </div><div>${record("19??", true)}</div></div>
+    </div>
     ${choiceTiles(song.choices, null, true)}
     ${foot(`<button class="btn pink" data-act="lock">Stop the clock and reveal</button>`)}`;
   }
