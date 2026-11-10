@@ -51,7 +51,8 @@ app.get("/join-qr.svg", async (req, res) => {
   const svg = await QRCode.toString(url, { type: "svg", margin: 0, color: { dark: "#1A1A1A", light: "#FFFFFF" } });
   res.type("image/svg+xml").send(svg);
 });
-app.use(express.static(PUBLIC_DIR, { maxAge: "1h" }));
+// No long-term caching: after a deploy, every browser picks up the new files on the next load
+app.use(express.static(PUBLIC_DIR, { maxAge: 0, etag: true, lastModified: true }));
 
 const server = http.createServer(app);
 const io = new Server(server);
