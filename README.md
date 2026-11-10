@@ -65,12 +65,10 @@ Alternatively, choose **New → Blueprint** and Render reads `render.yaml`. Chan
 
 | Host clicks | What happens |
 |---|---|
-| Start with song 1 | Clip 1 plays, the 15-second clock starts on every screen |
-| (clock hits zero) | Answers lock automatically; late taps are refused by the server |
-| Stop the clock now | Locks early if every team has answered |
-| Reveal the answer | Shows the year, the song and every team's guess and points |
-| Show leaderboard | Standings with movement since the last song |
-| Play song N | Next clip plays and the next clock starts |
+| Start with song 1 | Song 1 plays, the 15-second clock starts on every screen |
+| (clock hits zero) | Answers lock and the answer shows straight away with the leaderboard: each team's guess (✓ spot on, ≈ close, ✗ no points), points for the song, total and rank movement. Phones show the same leaderboard with the team's own row highlighted |
+| Stop the clock and reveal | Does the same early, if every team has answered |
+| Play song N | Next song plays and the next clock starts |
 | Restart game | Clears all scores and goes back to the lobby; teams stay joined |
 
 Scoring: spot on 1,000; 1 year off 700; 2 off 500; 3 off 300; 4–5 off 100. A team that doesn't answer gets 0 for that song.
