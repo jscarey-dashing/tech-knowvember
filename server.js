@@ -12,7 +12,6 @@ const { Server } = require("socket.io");
 const PORT = process.env.PORT || 3000;
 const HOST_PIN = String(process.env.HOST_PIN || "8888");
 const PUBLIC_DIR = path.join(__dirname, "public");
-const AUDIO_DIR = path.join(PUBLIC_DIR, "audio");
 
 /* ---------- Songs ---------- */
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, "songs.json"), "utf8"));
@@ -21,13 +20,19 @@ const ROUND_SECONDS = Number(process.env.ROUND_SECONDS || config.roundSeconds ||
 const GRACE_MS = 750; // allowance for network lag on the last-second tap
 const MAX_TEAMS = 60;
 
+// Accepts a Spotify track link, a spotify:track: URI or a bare 22-character track ID
+function spotifyUri(value) {
+  const v = String(value || "").trim();
+  const m = v.match(/track[/:]([A-Za-z0-9]{22})/) || v.match(/^([A-Za-z0-9]{22})$/);
+  return m ? `spotify:track:${m[1]}` : null;
+}
+
 SONGS.forEach((s, i) => {
   const n = i + 1;
   if (!Array.isArray(s.choices) || s.choices.length !== 4) throw new Error(`Song ${n} needs exactly 4 choices`);
   if (!s.choices.includes(s.year)) throw new Error(`Song ${n}: the choices must include the answer (${s.year})`);
-  if (s.audio && !fs.existsSync(path.join(AUDIO_DIR, s.audio))) {
-    console.warn(`Song ${n} (${s.title}): audio file public/audio/${s.audio} not found. The host will be told to play track ${s.track} instead.`);
-  }
+  s.uri = spotifyUri(s.spotify);
+  if (!s.uri) console.warn(`Song ${n} (${s.title}): no valid Spotify track link. The host will be told to play track ${s.track} instead.`);
 });
 
 function points(guess, song) {
@@ -88,8 +93,7 @@ function standings(upto) {
 function clip(i) {
   const s = SONGS[i];
   if (!s) return null;
-  const has = s.audio && fs.existsSync(path.join(AUDIO_DIR, s.audio));
-  return { n: i + 1, track: s.track, audio: has ? "/audio/" + encodeURIComponent(s.audio) : null, start: Number(s.start) || 0 };
+  return { n: i + 1, track: s.track, uri: s.uri, start: Math.max(0, Number(s.start) || 0) };
 }
 
 function viewFor(socket) {

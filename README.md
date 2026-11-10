@@ -3,7 +3,7 @@
 Hear the song. Guess the year. A live team music quiz for Dashing Tech's lunch.
 
 - **Players** open the site on one phone per team, enter a team name and pick one of four years for each song.
-- **The host** opens `/host` on the projector laptop, enters the PIN and runs the game. Each song's clip plays from the laptop, a 15-second clock runs, answers lock automatically at zero, and a leaderboard follows every song.
+- **The host** opens `/host` on the projector laptop, enters the PIN and runs the game. Each song plays through a Spotify player on the laptop (covered, so the title stays hidden), a 15-second clock runs, answers lock automatically at zero, and a leaderboard follows every song.
 
 No accounts are needed for players.
 
@@ -11,23 +11,21 @@ No accounts are needed for players.
 
 ```
 server.js            game server (Express + Socket.IO), holds the game in memory
-songs.json           the questions: title, artist, year, the 4 choices, audio file, clip start
-public/audio/        the song clips (MP3)
+songs.json           the questions: title, artist, year, the 4 choices, Spotify link, start second
 public/index.html    player page            public/player.js
 public/host.html     host / projector page  public/host.js
 public/common.js     shared rendering       public/style.css
 render.yaml          optional Render blueprint
 ```
 
-## Add the audio
+## Music (Spotify)
 
-1. Put one clip per song in `public/audio/`, named exactly as the `audio` field in `songs.json` (`01-poison.mp3`, `02-everybody.mp3`, …).
-2. Use MP3. Keep clips short (15–30 seconds) so they load instantly.
-3. If a clip should start partway through the file, set `"start"` (in seconds) for that song in `songs.json`.
+Each song in `songs.json` has a `spotify` link (copy it from Spotify with **Share → Copy song link**). The host screen plays it through Spotify's embedded player, docked in the bottom-right corner under a "Now playing" cover so nobody can read the title.
 
-When the server starts it lists any clip it can't find. A song without a clip still works: the host screen says which playlist track to play instead.
-
-> These are commercial recordings, so keep the GitHub repository **private**.
+- **Log in to Spotify in the host browser** (open.spotify.com, ideally a Premium account). Logged in, the full song plays and `"start"` (in seconds) lets you jump to the chorus. Logged out, Spotify plays its 30-second preview instead, which still covers a 15-second round, but `"start"` may be ignored.
+- Clicking **Start with song 1** or **Play song N** starts the music. The next song is loaded in advance during the leaderboard so it starts straight away.
+- If Spotify doesn't start, the host screen says so: click **Play clip again**, or play that track number from your playlist (the `track` field). The playlist order matches the song order.
+- Do a test run in the browser and on the network you'll use on the day.
 
 ## Change the songs
 

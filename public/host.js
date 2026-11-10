@@ -1,9 +1,7 @@
 /* Host / projector screen */
 const socket = io();
-const H = { state: null, offset: 0, offline: false, authed: false, pinDraft: "", err: "", restartArmed: false, audioMsg: "", playingN: null };
+const H = { state: null, offset: 0, offline: false, authed: false, pinDraft: "", err: "", restartArmed: false };
 const app = document.getElementById("app");
-const audio = new Audio();
-audio.preload = "auto";
 
 const timeLeft = s => Math.max(0, (s.qEndsAt - (Date.now() + H.offset)) / 1000);
 
@@ -17,13 +15,14 @@ socket.on("disconnect", () => { H.offline = true; render(); });
 socket.on("state", s => {
   H.offset = s.serverNow - Date.now();
   H.state = s;
-  if ((s.phase === "board" || s.phase === "lobby") && !audio.paused) fadeOut();
+  if (H.authed) loadSpotify();
+  if (s.phase === "board" || s.phase === "lobby" || s.phase === "final") { if (!SP.paused) pauseClip(); cue(s.next); }
   render();
 });
 
 function auth(pin, silent) {
   socket.emit("host:auth", pin, res => {
-    if (res && res.ok) { H.authed = true; H.err = ""; store.set("kv-pin", pin, true); }
+    if (res && res.ok) { H.authed = true; H.err = ""; store.set("kv-pin", pin, true); loadSpotify(); }
     else { H.authed = false; store.del("kv-pin", true); if (!silent) H.err = (res && res.error) || "That PIN isn’t right."; }
     H.pinDraft = "";
     render();
@@ -36,33 +35,76 @@ function act(type, extra = {}) {
   });
 }
 
-/* ---------- Audio ---------- */
-// Playback has to start inside a click, or the browser blocks it. So the
-// button that starts a song also starts its clip, before the server replies.
+/* ---------- Spotify player ----------
+   The Spotify embed sits in a dock in the corner, under a "Now playing" cover so
+   its title and artwork never show. The game drives it through Spotify's iFrame API. */
+const SP = { ctrl: null, requested: false, failed: false, loadedKey: null, startedKey: null, paused: true, pendingPlay: false, msg: "", watchdog: null };
+const dock = document.getElementById("spotify-dock");
+const keyOf = c => c.uri + "@" + c.start;
+
+function loadSpotify() {
+  const s = H.state;
+  const first = s && (s.next || s.clip);
+  if (SP.requested || !first || !first.uri) return;
+  SP.requested = true;
+  dock.hidden = false;
+  window.onSpotifyIframeApiReady = api => {
+    api.createController(document.getElementById("spotify-embed"), { uri: first.uri, width: "100%", height: "80" }, ctrl => {
+      SP.ctrl = ctrl;
+      SP.loadedKey = first.uri + "@0";
+      ctrl.addListener("ready", () => { if (SP.pendingPlay) { SP.pendingPlay = false; ctrl.play(); } });
+      ctrl.addListener("playback_update", e => {
+        const d = e.data || {};
+        const paused = !!d.isPaused;
+        if (!paused && !d.isBuffering) { clearTimeout(SP.watchdog); SP.startedKey = SP.loadedKey; if (SP.msg) { SP.msg = ""; render(); } }
+        if (paused !== SP.paused) { SP.paused = paused; render(); }
+      });
+      const s2 = H.state;
+      if (s2 && (s2.phase === "lobby" || s2.phase === "board")) cue(s2.next);
+      render();
+    });
+  };
+  const sc = document.createElement("script");
+  sc.src = "https://open.spotify.com/embed/iframe-api/v1";
+  sc.async = true;
+  sc.onerror = () => { SP.failed = true; render(); };
+  document.head.appendChild(sc);
+  setTimeout(() => { if (!SP.ctrl) { SP.failed = true; render(); } }, 12000);
+}
+
+// Load a song ahead of time so it starts instantly when the host clicks
+function cue(c) {
+  if (!SP.ctrl || !c || !c.uri || SP.loadedKey === keyOf(c)) return;
+  SP.loadedKey = keyOf(c);
+  SP.startedKey = null;
+  SP.ctrl.loadUri(c.uri, false, c.start);
+}
+
+// Must run inside the host's click so the browser allows sound
 function playClip(c) {
-  H.audioMsg = "";
+  SP.msg = "";
   if (!c) return;
-  if (!c.audio) { H.audioMsg = `No clip for song ${c.n}. Play track ${c.track} from the playlist.`; audio.pause(); return; }
-  clearInterval(fadeOut.timer);
-  audio.volume = 1;
-  audio.src = c.audio + (c.start ? `#t=${c.start}` : "");
-  H.playingN = c.n;
-  audio.play().catch(() => { H.audioMsg = `Couldn’t play the clip. Use “Play clip again”, or play track ${c.track} from the playlist.`; render(); });
+  if (!c.uri) { SP.msg = `No Spotify link for song ${c.n}. Play track ${c.track} from the playlist.`; return; }
+  if (!SP.ctrl) {
+    SP.msg = SP.failed ? `Spotify didn’t load. Play track ${c.track} from the playlist.` : "Spotify is still loading. Try “Play clip again” in a moment.";
+    return;
+  }
+  const key = keyOf(c);
+  if (SP.loadedKey !== key) {
+    SP.loadedKey = key; SP.startedKey = null; SP.pendingPlay = true;
+    SP.ctrl.loadUri(c.uri, false, c.start);
+    setTimeout(() => { if (SP.pendingPlay) { SP.pendingPlay = false; SP.ctrl.play(); } }, 1500);
+  } else if (SP.startedKey === key) {
+    SP.ctrl.seek(c.start); SP.ctrl.resume();
+  } else {
+    SP.ctrl.play();
+  }
+  clearTimeout(SP.watchdog);
+  SP.watchdog = setTimeout(() => {
+    if (SP.paused) { SP.msg = `Spotify didn’t start. Click “Play clip again”, or play track ${c.track} from the playlist.`; render(); }
+  }, 7000);
 }
-function fadeOut() {
-  clearInterval(fadeOut.timer);
-  fadeOut.timer = setInterval(() => {
-    audio.volume = Math.max(0, audio.volume - 0.08);
-    if (audio.volume <= 0.01) { clearInterval(fadeOut.timer); audio.pause(); audio.volume = 1; render(); }
-  }, 80);
-}
-audio.addEventListener("error", () => {
-  if (!audio.getAttribute("src")) return;
-  H.audioMsg = "The clip file couldn’t be loaded. Check it’s in public/audio and named as in songs.json.";
-  render();
-});
-audio.addEventListener("play", () => render());
-audio.addEventListener("pause", () => render());
+function pauseClip() { clearTimeout(SP.watchdog); if (SP.ctrl) SP.ctrl.pause(); }
 
 /* ---------- Clicks ---------- */
 const actions = {
@@ -73,12 +115,12 @@ const actions = {
   board: () => act("board"),
   next: () => { if (H.state.next) playClip(H.state.next); act("next"); },
   replay: () => playClip(H.state.clip),
-  pause: () => audio.pause(),
+  pause: () => pauseClip(),
   remove: el => act("removeTeam", { id: el.dataset.id }),
   clearTeams: () => act("clearTeams"),
   restart: () => {
     if (!H.restartArmed) { H.restartArmed = true; render(); setTimeout(() => { H.restartArmed = false; render(); }, 3500); return; }
-    H.restartArmed = false; audio.pause(); act("restart");
+    H.restartArmed = false; pauseClip(); act("restart");
   },
 };
 app.addEventListener("click", e => {
@@ -105,11 +147,10 @@ function view() {
   const audioBar = () => {
     const c = s.clip;
     if (!c) return "";
-    const playing = !audio.paused && H.playingN === c.n;
     return `<div class="audiobar">
-      ${c.audio ? `<button class="btn small ghost" data-act="replay">Play clip again</button>
-        ${playing ? `<button class="btn small ghost" data-act="pause">Pause</button>` : ""}` : ""}
-      ${H.audioMsg ? `<p class="note">${esc(H.audioMsg)}</p>` : !c.audio ? `<p class="note">No clip for this song. Play track ${c.track} from the playlist.</p>` : ""}
+      ${c.uri ? `<button class="btn small ghost" data-act="replay">Play clip again</button>
+        ${!SP.paused ? `<button class="btn small ghost" data-act="pause">Pause</button>` : ""}` : ""}
+      ${SP.msg ? `<p class="note">${esc(SP.msg)}</p>` : !c.uri ? `<p class="note">No Spotify link for this song. Play track ${c.track} from the playlist.</p>` : ""}
     </div>`;
   };
 
@@ -178,6 +219,10 @@ function view() {
 
 function render() {
   paint(app, view() + (H.offline ? `<div class="offline" role="status">Reconnecting to the server…</div>` : ""));
+  dock.hidden = !H.authed || !SP.requested;
+  dock.classList.toggle("playing", !SP.paused);
+  document.getElementById("dockText").textContent =
+    SP.failed && !SP.ctrl ? "Spotify unavailable" : !SP.ctrl ? "Loading Spotify…" : SP.paused ? "Spotify ready" : "Now playing";
   tick();
 }
 function tick() {

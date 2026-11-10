@@ -10,8 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@500;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 </head>
-<body>
+<body class="host">
 <div id="app" class="wrap"><p class="note">Loading Know-vember…</p></div>
+<div id="spotify-dock" class="spotify-dock" hidden>
+  <div id="spotify-embed"></div>
+  <div class="spotify-cover" aria-hidden="true"><span class="mini-disc"></span><span><b id="dockText">Loading Spotify…</b><br>Title hidden</span></div>
+</div>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/common.js"></script>
 <script src="/host.js"></script>
