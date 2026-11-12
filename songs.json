@@ -1,18 +1,20 @@
 {
-  "roundSeconds": 15,
+  "roundSeconds": 30,
   "songs": [
-    {"title": "Poison", "artist": "Bell Biv DeVoe", "year": 1990, "track": 1, "choices": [1987, 1990, 1994, 1985], "spotify": "https://open.spotify.com/track/50DAHcCqneoupFyh96P2GP", "start": 0},
-    {"title": "Everybody (Backstreet’s Back)", "artist": "Backstreet Boys", "year": 1997, "track": 2, "choices": [2000, 1994, 1997, 1999], "spotify": "https://open.spotify.com/track/1di1BEgJYzPvXUuinsYJGP", "start": 0},
-    {"title": "Mr. Brightside", "artist": "The Killers", "year": 2003, "track": 3, "choices": [2003, 2006, 2000, 2008], "spotify": "https://open.spotify.com/track/003vvx7Niy0yvhvHt4a68B", "start": 0},
-    {"title": "Get Inspired", "artist": "Genesis Owusu", "year": 2022, "track": 4, "choices": [2019, 2024, 2022, 2017], "spotify": "https://open.spotify.com/track/4Og0uXMYqouN7xOQ7u8jiW", "start": 0},
-    {"title": "Watermelon Sugar", "artist": "Harry Styles", "year": 2020, "track": 5, "choices": [2018, 2020, 2022, 2016], "spotify": "https://open.spotify.com/track/6UelLqGlWMcVH1E5c4H7lY", "start": 0},
-    {"title": "Shake It Off", "artist": "Taylor Swift", "year": 2014, "track": 6, "choices": [2012, 2016, 2010, 2014], "spotify": "https://open.spotify.com/track/0cqRj7pUJDkTCEsJkx8snD", "start": 0},
-    {"title": "Rock with You", "artist": "Michael Jackson", "year": 1979, "track": 7, "choices": [1983, 1979, 1975, 1987], "spotify": "https://open.spotify.com/track/7oOOI85fVQvVnK5ynNMdW7", "start": 0},
-    {"title": "Wonderwall", "artist": "Oasis", "year": 1995, "track": 8, "choices": [1995, 1998, 1992, 2001], "spotify": "https://open.spotify.com/track/1qPbGZqppFwLwcBC1JQ6Vr", "start": 0},
-    {"title": "Somebody That I Used to Know", "artist": "Gotye & Kimbra", "year": 2011, "track": 9, "choices": [2013, 2009, 2015, 2011], "spotify": "https://open.spotify.com/track/1qk9ujVgudgU8CyhKOx8ji", "start": 0},
-    {"title": "Viva La Vida", "artist": "Coldplay", "year": 2008, "track": 10, "choices": [2005, 2008, 2011, 2003], "spotify": "https://open.spotify.com/track/1SLxVWqXo9zNrrDKRa3m1G", "start": 0},
-    {"title": "Burning Love", "artist": "Elvis Presley", "year": 1972, "track": 11, "choices": [1968, 1975, 1972, 1965], "spotify": "https://open.spotify.com/track/7zMUCLm1TN9o9JlLISztxO", "start": 0},
-    {"title": "Man I Need", "artist": "Olivia Dean", "year": 2026, "track": 12, "choices": [2023, 2021, 2026, 2024], "spotify": "https://open.spotify.com/track/1qbmS6ep2hbBRaEZFpn7BX", "start": 0},
-    {"title": "Rolling in the Deep", "artist": "Adele", "year": 2010, "track": 13, "choices": [2010, 2013, 2007, 2012], "spotify": "https://open.spotify.com/track/4OSBTYWVwsQhGLF9NHvIbR", "start": 0}
+    {"title": "Sawadika", "artist": "LISA", "year": 2026, "track": 1, "choices": [2023, 2026, 2021, 2024], "spotify": "https://open.spotify.com/track/1VWiDyYTrqQhhmnWANWkFa", "start": 0},
+    {"title": "Poison", "artist": "Bell Biv DeVoe", "year": 1990, "track": 2, "choices": [1987, 1990, 1994, 1985], "spotify": "https://open.spotify.com/track/50DAHcCqneoupFyh96P2GP", "start": 0},
+    {"title": "Everybody (Backstreet’s Back)", "artist": "Backstreet Boys", "year": 1997, "track": 3, "choices": [2000, 1994, 1997, 1999], "spotify": "https://open.spotify.com/track/1di1BEgJYzPvXUuinsYJGP", "start": 0},
+    {"title": "Mr. Brightside", "artist": "The Killers", "year": 2003, "track": 4, "choices": [2003, 2006, 2000, 2008], "spotify": "https://open.spotify.com/track/003vvx7Niy0yvhvHt4a68B", "start": 0},
+    {"title": "Get Inspired", "artist": "Genesis Owusu", "year": 2022, "track": 5, "choices": [2019, 2024, 2022, 2017], "spotify": "https://open.spotify.com/track/4Og0uXMYqouN7xOQ7u8jiW", "start": 0},
+    {"title": "Watermelon Sugar", "artist": "Harry Styles", "year": 2020, "track": 6, "choices": [2018, 2020, 2022, 2016], "spotify": "https://open.spotify.com/track/6UelLqGlWMcVH1E5c4H7lY", "start": 0},
+    {"title": "Shake It Off", "artist": "Taylor Swift", "year": 2014, "track": 7, "choices": [2012, 2016, 2010, 2014], "spotify": "https://open.spotify.com/track/0cqRj7pUJDkTCEsJkx8snD", "start": 0},
+    {"title": "Rock with You", "artist": "Michael Jackson", "year": 1979, "track": 8, "choices": [1983, 1979, 1975, 1987], "spotify": "https://open.spotify.com/track/7oOOI85fVQvVnK5ynNMdW7", "start": 0},
+    {"title": "Wonderwall", "artist": "Oasis", "year": 1995, "track": 9, "choices": [1995, 1998, 1992, 2001], "spotify": "https://open.spotify.com/track/1qPbGZqppFwLwcBC1JQ6Vr", "start": 0},
+    {"title": "Somebody That I Used to Know", "artist": "Gotye & Kimbra", "year": 2011, "track": 10, "choices": [2013, 2009, 2015, 2011], "spotify": "https://open.spotify.com/track/1qk9ujVgudgU8CyhKOx8ji", "start": 0},
+    {"title": "Viva La Vida", "artist": "Coldplay", "year": 2008, "track": 11, "choices": [2005, 2008, 2011, 2003], "spotify": "https://open.spotify.com/track/1SLxVWqXo9zNrrDKRa3m1G", "start": 0},
+    {"title": "Burning Love", "artist": "Elvis Presley", "year": 1972, "track": 12, "choices": [1968, 1975, 1972, 1965], "spotify": "https://open.spotify.com/track/7zMUCLm1TN9o9JlLISztxO", "start": 0},
+    {"title": "Man I Need", "artist": "Olivia Dean", "year": 2026, "track": 13, "choices": [2023, 2021, 2026, 2024], "spotify": "https://open.spotify.com/track/1qbmS6ep2hbBRaEZFpn7BX", "start": 0},
+    {"title": "Rolling in the Deep", "artist": "Adele", "year": 2010, "track": 14, "choices": [2010, 2013, 2007, 2012], "spotify": "https://open.spotify.com/track/4OSBTYWVwsQhGLF9NHvIbR", "start": 0},
+    {"title": "Gangnam Style", "artist": "PSY", "year": 2012, "track": 15, "choices": [2010, 2014, 2012, 2009], "spotify": "https://open.spotify.com/track/03UrZgTINDqvnUMbbIMhql", "start": 0}
   ]
 }

@@ -70,7 +70,7 @@ function view() {
   if (s.phase === "lobby") return `<div class="phone">${top}
     <div class="ticket mt"><div class="k">You’re in</div><div class="v pink">${esc(me.name)}</div></div>
     <div class="panel mt"><p style="margin:0 0 6px;font-weight:800">Waiting for the host to start.</p>
-    ${stepsList("here")}${scoringTable()}</div></div>`;
+    ${stepsList("here", s.roundSeconds)}${scoringTable()}</div></div>`;
 
   if (s.phase === "question" || s.phase === "locked") {
     const has = me.answer != null;

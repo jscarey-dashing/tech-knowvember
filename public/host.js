@@ -1,6 +1,6 @@
 /* Host / projector screen */
 const socket = io();
-const APP_VERSION = "2026-11-10.3"; // shown on the host screen so you can check the deploy is current
+const APP_VERSION = "2026-11-10.5"; // shown on the host screen so you can check the deploy is current
 const H = { state: null, offset: 0, offline: false, authed: false, pinDraft: "", err: "", restartArmed: false };
 const app = document.getElementById("app");
 
@@ -219,7 +219,7 @@ function view() {
   if (s.phase === "lobby") return `${mast()}<div class="split">
     <div>${titleHtml()}</div>
     <div><p class="tagline">Hear the <span class="p">song.</span><br>Guess the <span class="bl">year.</span></p>
-      ${stepsList("on your phone")}${scoringTable()}</div></div>
+      ${stepsList("on your phone", s.roundSeconds)}${scoringTable()}</div></div>
     <div class="mt"><div class="joinbox"><div class="qr"><img src="/join-qr.svg" alt="QR code to join the game"></div>
       <div><p class="counter" style="margin:0">Scan or go to</p><p class="joinurl" style="margin:4px 0 0">${esc(location.host)}</p>
       <p class="note">One phone per team.</p></div></div>

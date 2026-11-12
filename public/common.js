@@ -15,8 +15,8 @@ const scoringTable = () => `<div class="scoring">
   <span>Spot on</span><b>1,000</b><span>1 year off</span><b>700</b><span>2 years off</span><b>500</b>
   <span>3 years off</span><b>300</b><span>4–5 years off</span><b>100</b></div>`;
 
-function stepsList(where) {
-  return `<ol class="steps"><li><span>01</span>We play a song.</li><li><span>02</span>Your team has 15 seconds.</li><li><span>03</span>Pick the year ${where}.</li></ol>`;
+function stepsList(where, seconds) {
+  return `<ol class="steps"><li><span>01</span>We play a song.</li><li><span>02</span>Your team has ${seconds} seconds.</li><li><span>03</span>Pick the year ${where}.</li></ol>`;
 }
 
 /* chosen: the year this team picked (player) or null; host: big-screen tiles that can't be tapped */

@@ -16,7 +16,7 @@ const PUBLIC_DIR = path.join(__dirname, "public");
 /* ---------- Songs ---------- */
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, "songs.json"), "utf8"));
 const SONGS = config.songs;
-const ROUND_SECONDS = Number(process.env.ROUND_SECONDS || config.roundSeconds || 15);
+const ROUND_SECONDS = Number(process.env.ROUND_SECONDS || config.roundSeconds || 30);
 const GRACE_MS = 750; // allowance for network lag on the last-second tap
 const MAX_TEAMS = 60;
 

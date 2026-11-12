@@ -3,7 +3,7 @@
 Hear the song. Guess the year. A live team music quiz for Dashing Tech's lunch.
 
 - **Players** open the site on one phone per team, enter a team name and pick one of four years for each song.
-- **The host** opens `/host` on the projector laptop, enters the PIN and runs the game. Each song plays through a Spotify player on the laptop (covered, so the title stays hidden), a 15-second clock runs, answers lock automatically at zero, and a leaderboard follows every song.
+- **The host** opens `/host` on the projector laptop, enters the PIN and runs the game. Each song plays through a Spotify player on the laptop (covered, so the title stays hidden), a 30-second clock runs, answers lock automatically at zero, and a leaderboard follows every song.
 
 No accounts are needed for players.
 
@@ -22,7 +22,7 @@ render.yaml          optional Render blueprint
 
 Each song in `songs.json` has a `spotify` link (copy it from Spotify with **Share → Copy song link**). The host screen plays it through Spotify's embedded player, docked in the bottom-right corner under a "Now playing" cover so nobody can read the title.
 
-- **Log in to Spotify in the host browser** (open.spotify.com, ideally a Premium account). Logged in, the full song plays and `"start"` (in seconds) lets you jump to the chorus. Logged out, Spotify plays its 30-second preview instead, which still covers a 15-second round, but `"start"` may be ignored.
+- **Log in to Spotify in the host browser** (open.spotify.com, ideally a Premium account). Logged in, the full song plays and `"start"` (in seconds) lets you jump to the chorus. Logged out, Spotify plays its 30-second preview instead, which roughly covers a 30-second round, but `"start"` may be ignored.
 - Clicking **Start with song 1** or **Play song N** starts the music. The next song is loaded in advance during the leaderboard so it starts straight away.
 - If Spotify doesn't start, the host screen says so: click **Play clip again**, or play that track number from your playlist (the `track` field). The playlist order matches the song order.
 - Do a test run in the browser and on the network you'll use on the day.
@@ -30,7 +30,7 @@ Each song in `songs.json` has a `spotify` link (copy it from Spotify with **Shar
 ## Change the songs
 
 Edit `songs.json`. Each song needs exactly 4 `choices`, and one of them must be the `year`. The server refuses to start if a song breaks either rule, and tells you which one.
-`roundSeconds` sets the answer clock (15 by default).
+`roundSeconds` sets the answer clock (30 by default).
 
 ## Run it locally
 
@@ -65,7 +65,7 @@ Alternatively, choose **New → Blueprint** and Render reads `render.yaml`. Chan
 
 | Host clicks | What happens |
 |---|---|
-| Start with song 1 | Song 1 plays, the 15-second clock starts on every screen |
+| Start with song 1 | Song 1 plays, the 30-second clock starts on every screen |
 | (clock hits zero) | Answers lock and the answer shows straight away with the leaderboard: each team's guess (✓ spot on, ≈ close, ✗ no points), points for the song, total and rank movement. Phones show the same leaderboard with the team's own row highlighted |
 | Stop the clock and reveal | Does the same early, if every team has answered |
 | Play song N | Next song plays and the next clock starts |
